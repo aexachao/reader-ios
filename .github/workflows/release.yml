@@ -36,11 +36,18 @@ jobs:
         run: |
           mkdir -p Payload
           cp -r "build/阅读.xcarchive/Products/Applications/阅读.app" Payload/
-          zip -r "阅读.ipa" Payload
+          zip -r "reader-ios.ipa" Payload
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reader-ios.ipa
+          path: reader-ios.ipa
 
       - name: Upload Release Asset
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: 阅读.ipa
+          files: reader-ios.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
