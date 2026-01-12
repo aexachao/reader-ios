@@ -1,0 +1,45 @@
+name: Build & Release IPA
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build IPA
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
+
+      - name: Build Archive (Unsigned)
+        run: |
+          xcodebuild archive \
+            -project "阅读.xcodeproj" \
+            -scheme "阅读" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "build/阅读.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+      - name: Export IPA
+        run: |
+          mkdir -p Payload
+          cp -r "build/阅读.xcarchive/Products/Applications/阅读.app" Payload/
+          zip -r "阅读.ipa" Payload
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: 阅读.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
