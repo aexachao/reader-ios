@@ -83,6 +83,11 @@ final class WebViewCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         logger?("Provisional navigation failed: \(error)")
     }
 
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        logger?("WebContent process terminated, reloading...")
+        webView.reload()
+    }
+
     @objc func handleReloadNotification(_ n: Notification) {
         DispatchQueue.main.async {
             self.webview?.reload()
