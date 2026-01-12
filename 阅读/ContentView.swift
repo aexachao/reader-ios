@@ -23,6 +23,8 @@ struct ContentView: View {
     @State private var showingInitialSetup = false
     
 
+    @Environment(\.scenePhase) var scenePhase
+
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
@@ -137,7 +139,16 @@ struct ContentView: View {
                 object: newValue
             )
         }
-        // debug overlay removed
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                // If user comes back and it's still "loading", it might be stuck.
+                // Force a refresh to wake up the webview.
+                if isLoading && currentURL != nil {
+                   print("App resumed while loading, forcing refresh...")
+                   refresh()
+                }
+            }
+        }
     }
 
     // (No modal transparent controller – using lightweight HomeIndicatorController overlay only)
